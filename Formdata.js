@@ -1,11 +1,13 @@
 import React from "react";
 import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
+import Axios from "axios";
 
 const SignupSchema = Yup.object().shape({
   fullName: Yup.string().required("Required"),
+  username: Yup.string().required("Required"),
 
-  phone: Yup.string()
+  mobile: Yup.string()
     .required("required")
     .min(10, "minimum 10 digit number required")
     .max(10, "only 10 digit number required"),
@@ -32,15 +34,38 @@ const Formdata = () => (
       <Formik
         initialValues={{
           fullName: "",
+          username: "",
           email: "",
           password: "",
-          phone: "",
+          mobile: "",
           conformpassword: "",
           remember: "",
         }}
         validationSchema={SignupSchema}
         onSubmit={(values, { resetForm }) => {
           resetForm({ values: "" });
+          console.log(values);
+          var bodyFormData = new FormData();
+          bodyFormData.append("full_name", values.fullName);
+          bodyFormData.append("username", values.username);
+          bodyFormData.append("email", values.email);
+          bodyFormData.append("mobile", values.mobile);
+          bodyFormData.append("password", values.password);
+          bodyFormData.append("referral_code", "");
+          Axios({
+            method: "post",
+            url: "https://urlsdemo.in/mangtum/panel/api/v1.0/signup",
+            data: bodyFormData,
+            headers: { "Content-Type": "multipart/form-data" },
+          })
+            .then(function (response) {
+              //handle success
+              console.log(response);
+            })
+            .catch(function (response) {
+              //handle error
+              console.log(response);
+            });
         }}
       >
         {({ errors, touched }) => (
@@ -56,6 +81,16 @@ const Formdata = () => (
             ) : null}
             <br />
             <Field
+              name="username"
+              type="text"
+              placeholder="username*"
+              className="my-1 py-1 "
+            />
+            {errors.username && touched.username ? (
+              <div>{errors.username}</div>
+            ) : null}
+            <br />
+            <Field
               name="email"
               type="email"
               placeholder="Email*"
@@ -64,7 +99,7 @@ const Formdata = () => (
             {errors.email && touched.email ? <div>{errors.email}</div> : null}
             <br />
             <Field
-              name="phone"
+              name="mobile"
               type="number"
               placeholder="Mobile Number*"
               className="my-1 py-1"
